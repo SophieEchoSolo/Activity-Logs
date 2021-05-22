@@ -1,2 +1,5 @@
 apriltomayactivity.csv
 fitbit_export_20210521.xls
+.env
+input.csv
+output.csv

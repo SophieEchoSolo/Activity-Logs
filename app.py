@@ -4,7 +4,7 @@ import datetime
 actDict = dict()
 
 def activityParse():
-    with open("apriltomayactivity.csv", newline='') as csvFile:
+    with open("input.csv", newline='') as csvFile:
         csvReader = csv.DictReader(csvFile)
 
         for row in csvReader:
@@ -25,20 +25,28 @@ def getAvgs(actDict):
     for key in actDict.keys():
         total = 0
         if key.lower() != "date":
-            avgDict.update({key:[]})
+            avgDict.update({key:0})
             for val in actDict[key]:
                 total+=float(val.replace(',',''))
-            avgDict[key].append(round(total/len(actDict[key]),2))
+            avgDict.update({key: round(total/len(actDict[key]),2)})
         else:
             for val in actDict["Date"]:
                 dates = datetime.datetime.strptime(val,"%Y-%m-%d")
                 dateList.append(dates)
 
     print(f"The average values of each field for the time period of {str(dateList[0])} to {str(dateList[-1])} are as follows: {str(avgDict)}" )
+    return avgDict
             
+def writeExcel(avgDict):
+    with open('output.csv', 'w', newline='') as csvfile:
+        fileWriter = csv.writer(csvfile)
+        for key, value in avgDict.items():
+            fileWriter.writerow([key, value])
+
 
 
 
 if __name__ == "__main__":
     newDict = activityParse()
-    getAvgs(newDict)
+    newAvgs = getAvgs(newDict)
+    writeExcel(newAvgs)
