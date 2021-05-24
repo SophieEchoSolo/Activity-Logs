@@ -17,16 +17,6 @@ def activityParse():
                     actDict[key].append(value)
                 else:
                     actDict[key] = value
-        for key in actDict.keys():
-            if key.lower() != "date" and key.lower() != "floors":
-                actDict.update({key:0})
-                for val in actDict[key]:
-                    val=float(val.replace(',',''))
-                actDict.update({key: val})
-            else:
-                for val in actDict["Date"]:
-                    val = datetime.datetime.strptime(val,"%Y-%m-%d")
-                    actDict["Date"] = val
         
         return actDict
 
@@ -55,8 +45,18 @@ def writeExcel(avgDict):
         for key, value in avgDict.items():
             fileWriter.writerow([key, value])
 
-#test plot
 def plotData(actDict):
+    #ValueError: dictionary update sequence element #0 has length 4; 2 is required
+    #should move this to the activity parse function
+    for k, v in actDict.items():
+        if k.lower() != "date":
+            for vals in v: 
+                vals = float(vals.replace(',',''))
+                actDict.update({k, vals})
+        else:
+            for vals in v:
+                vals = datetime.datetime.strptime(vals,"%Y-%m-%d")
+                actDict.update({k, vals})
 
     for k, v in actDict.items():
         plt.title(k.upper())
