@@ -1,36 +1,21 @@
-import csv
+import fitbit
 import datetime
 import matplotlib.pyplot as plt
-import numpy as np
+from dotenv import load_dotenv
+import os
+import json
+from functools import reduce
+from fitauth import *
 
 
-def activityParse():
-    actDict = dict()
-    with open("input.csv", newline='') as csvFile:
-        csvReader = csv.DictReader(csvFile)
-
-        for row in csvReader:
-            for key, value in row.items():
-                if key in actDict:
-                    if not isinstance(actDict[key], list):
-                        actDict[key] = [actDict[key]]
-                    actDict[key].append(value)
-                else:
-                    actDict[key] = value
-
-    dateKeys = ['Date']
-    for key in actDict.keys():
-        if key in dateKeys:
-            actDict[key] = list(map(lambda d: datetime.datetime.strptime(
-                d, "%Y-%m-%d").date(), actDict[key]))
-        else:
-            actDict[key] = list(
-                map(lambda n: float(n.replace(',', '')), actDict[key]))
-
-    return actDict
+def activityParse(activities):
+    # print(activities)
+    # Needs to be updated due to fitauth implementation
+    return activities
 
 
 def getAvgs(actDict):
+    # Needs to be updated due to fitauth implementation
     avgDict = {}
     dateList = []
 
@@ -39,6 +24,7 @@ def getAvgs(actDict):
         if key.lower() != "date" and key.lower() != "floors":
             avgDict.update({key: 0})
             for val in actDict[key]:
+                print(val)
                 total += val
             avgDict.update({key: round(total/len(actDict[key]), 2)})
         else:
@@ -48,13 +34,6 @@ def getAvgs(actDict):
     print(
         f"The average values of each field for the time period of {str(dateList[0])} to {str(dateList[-1])} are as follows: {str(avgDict)}")
     return avgDict
-
-
-def writeExcel(avgDict):
-    with open('output.csv', 'w', newline='') as csvfile:
-        fileWriter = csv.writer(csvfile)
-        for key, value in avgDict.items():
-            fileWriter.writerow([key, value])
 
 
 def plotData(actDict):
@@ -72,7 +51,14 @@ def plotData(actDict):
 
 
 if __name__ == "__main__":
-    newDict = activityParse()
+    actList = ["activities/calories", "activities/steps"]
+    load_dotenv()
+    KEY = os.getenv('CONSUMER_KEY')
+    SECRET = os.getenv('CONSUMER_SECRET')
+    auth = loadAuth()
+    authd_client = fitbit.Fitbit(KEY, SECRET,
+                                 access_token=auth['access_token'], refresh_token=auth["refresh_token"], refresh_cb=saveAuth, expires_at=auth["expires_at"])
+    newDict = activityParse(reduce(mergeDict, map(lambda a: authd_client.time_series(
+        a, period="1d"), actList)))
     newAvgs = getAvgs(newDict)
-    writeExcel(newAvgs)
-    plotData(newDict)
+    # plotData(newDict)
