@@ -3,13 +3,8 @@ import datetime
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import os
-import json
-from functools import reduce
 from fitauth import *
 import pandas as pd
-
-TEST_DATA = {'activities-calories': [{'dateTime': '2021-05-19', 'value': '2361'}, {'dateTime': '2021-05-20', 'value': '3188'}, {'dateTime': '2021-05-21', 'value': '2832'}, {'dateTime': '2021-05-22', 'value': '2767'}, {'dateTime': '2021-05-23', 'value': '2665'}, {'dateTime': '2021-05-24', 'value': '2847'}, {'dateTime': '2021-05-25', 'value': '1920'}],
-             'activities-steps': [{'dateTime': '2021-05-19', 'value': '1148'}, {'dateTime': '2021-05-20', 'value': '7671'}, {'dateTime': '2021-05-21', 'value': '5667'}, {'dateTime': '2021-05-22', 'value': '4629'}, {'dateTime': '2021-05-23', 'value': '4555'}, {'dateTime': '2021-05-24', 'value': '5314'}, {'dateTime': '2021-05-25', 'value': '4237'}]}
 
 
 def activityParse(activities):
@@ -27,8 +22,8 @@ def activityParse(activities):
 
 
 def getDataframes(actDict):
-    # Need to sort out plots stacking
     for key in actDict.keys():
+        plt.clf()
         df = pd.DataFrame()
         df = pd.DataFrame(data=newDict[key])
         df = df.sort_values('dateTime', ascending=True)
@@ -43,7 +38,8 @@ def getDataframes(actDict):
 
 
 if __name__ == "__main__":
-    actList = ["activities/calories", "activities/steps"]
+    actList = ["activities/calories", "activities/steps", "activities/distance", "activities/minutesSedentary",
+               'activities/minutesLightlyActive', 'activities/minutesFairlyActive', 'activities/minutesVeryActive', 'activities/activityCalories']
     load_dotenv()
     KEY = os.getenv('CONSUMER_KEY')
     SECRET = os.getenv('CONSUMER_SECRET')
@@ -51,9 +47,8 @@ if __name__ == "__main__":
     authd_client = fitbit.Fitbit(KEY, SECRET,
                                  access_token=auth['access_token'], refresh_token=auth["refresh_token"], refresh_cb=saveAuth, expires_at=auth["expires_at"])
 
-    # activityData = reduce(mergeDict, map(lambda a: authd_client.time_series(
-    #     a, period="7d"), actList))
+    activityData = reduce(mergeDict, map(
+        lambda a: authd_client.time_series(a, period="30d"), actList))
 
-    activityData = TEST_DATA
     newDict = activityParse(activityData)
     getDataframes(newDict)

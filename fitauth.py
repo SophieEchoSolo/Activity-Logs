@@ -12,7 +12,8 @@ from functools import reduce
 # activities/minutesFairlyActive
 # activities/minutesVeryActive
 # activities/activityCalories
-actList = ["activities/calories", "activities/steps"]
+actList = ["activities/calories", "activities/steps", "activities/distance", "activities/minutesSedentary",
+           'activities/minutesLightlyActive', 'activities/minutesFairlyActive', 'activities/minutesVeryActive', 'activities/activityCalories']
 
 
 def mergeDict(dict1, dict2):
@@ -28,7 +29,6 @@ def loadAuth():
 def saveAuth(tokenDict):
     with open('auth.json', 'w') as outfile:
         json.dump(tokenDict, outfile)
-    print(tokenDict)
 
 
 if __name__ == "__main__":
